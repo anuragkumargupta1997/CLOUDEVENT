@@ -1,0 +1,230 @@
+version: v1beta1
+name: sample-job-standalone
+type: workflow
+tags:
+  - getting-data
+  - product
+  - retailer
+  - orders
+description: This job takes input of product retailer and order data and joins all
+owner: rubik-ai
+workflow:
+  dag:
+    - name: retail-data-enrichment
+      title: retailer orders enriched data
+      description: This job takes input of product retailer and order data and joins all
+      spec:
+        tags:
+          - Transformation
+        stack: flare:1.0
+        tier: connect
+        flare:
+          driver:
+            coreLimit: 1200m
+            cores: 1
+            memory: 1024m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1                                                                 
+            memory: 1024m
+          job:
+            explain: true   
+
+            inputs:
+              - name: cloudevent
+                dataset: /datadir/cloud/cloudevent.csv
+                format: csv
+              - name: schema_json
+                dataset: /datadir/cloud/schema1.json
+                format: json 
+
+            logLevel: ERROR 
+                       
+            outputs:
+              - name: output02
+                depot:  /datadir/output
+
+            steps:
+              - sink:
+                # - sequenceName: frames
+                #   datasetName: table02
+                #   outputName: output02
+                #   outputType: CSV
+                #   description: retailer enriched data
+                #   outputOptions:
+                #     saveMode: append
+            
+                sequence:
+                  - name: frame01        
+                    sql: select * from cloudevent
+                    functions:
+                      - name: parse_as_json
+                        column: data
+                        asColumn: data_x
+                        sparkSchema: "{\"type\":\"struct\",\"fields\":[{\"name\":\"accessedTables\",\"type\":{\"type\":\"array\",\"elementType\":{\"type\":\"struct\",\"fields\":[{\"name\":\"catalog\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"columns\",\"type\":{\"type\":\"array\",\"elementType\":{\"type\":\"struct\",\"fields\":[{\"name\":\"maskPolicy\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"masks\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"type\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]},\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"directlyReferenced\",\"type\":\"boolean\",\"nullable\":true,\"metadata\":{}},{\"name\":\"filterExpressions\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"filterPolicy\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"schema\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"table\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]},\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"analysisTime\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"catalogs\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"clientInfo\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"clientTags\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"completedSplits\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"cpuTimeMs\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"createTime\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"cumulativeMemory\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"endTime\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"environment\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"executionTime\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"failureInfo\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"filterPolicies\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"internalNetworkBytes\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"internalNetworkRows\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"maskPolicies\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"operatorSummaries\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"outputBytes\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"outputRows\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"peakTaskTotalMemory\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"peakTaskUserMemory\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"peakUserMemoryBytes\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"physicalInputBytes\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"physicalInputRows\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"planNodeStatsAndCosts\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"planOperatorSummaries\",\"type\":{\"type\":\"array\",\"elementType\":{\"type\":\"struct\",\"fields\":[{\"name\":\"addInputCpu\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"addInputWall\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"blockedWall\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"finishCpu\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"finishWall\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"getOutputWall\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"inputDataSize\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"inputPositions\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"internalNetworkInputDataSize\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"operatorType\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"outputDataSize\",\"type\":\"double\",\"nullable\":true,\"metadata\":{}},{\"name\":\"outputPositions\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"planNodeId\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}]},\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"principal\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"query\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"queryHash\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"queryId\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"queryState\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"queryType\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"queuedTimeMs\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"remoteClientAddress\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"resourceWaitingTime\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"serverAddress\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"serverVersion\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"source\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"tables\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"totalBytes\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"totalRows\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"traceToken\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"user\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"userAgent\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"wallTimeMs\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"warnings\",\"type\":{\"type\":\"array\",\"elementType\":\"string\",\"containsNull\":true},\"nullable\":true,\"metadata\":{}},{\"name\":\"writtenBytes\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}},{\"name\":\"writtenRows\",\"type\":\"long\",\"nullable\":true,\"metadata\":{}}]}\r\n"
+                      - name: drop
+                        columns:
+                        - data
+                        - user
+                        - type
+                      - name: rename_all
+                        columns:
+                          source: sources   
+                  
+                  - name: frame02
+                    sql: select * from frame01
+                    functions:
+                      - name: unfurl 
+                        expression: "data_x.*"
+                      - name: drop
+                        columns:
+                        - data_x
+
+                  - name: frame03
+                    sql: select *,explode_outer(accessedTables) from frame02
+
+                  - name: frame04
+                    sql: select * from frame03
+                    functions:
+                      - name: drop
+                        columns:
+                        - accessedTables
+                       
+                  - name: frame05
+                    sql: select * from frame04
+                    functions:
+                      - name: unfurl 
+                        expression: "col.*"
+                      - name: drop
+                        columns:
+                        - col
+                        - name  
+                        
+                  - name: frame06
+                    sql: select *,explode_outer(columns) from frame05
+
+                  - name: frame07
+                    sql: select * from frame06
+                    functions:
+                      - name: drop
+                        columns:
+                        - columns   
+
+                  - name: frame08
+                    sql: select * from frame07
+                    functions:
+                      - name: unfurl 
+                        expression: "col.*"
+                      - name: drop
+                        columns:
+                        - col                    
+                    
+                  - name: frame09
+                    sql: select *,explode_outer(planOperatorSummaries) from frame08
+                   
+                  - name: frame10
+                    sql: select * from frame09
+                    functions:
+                      - name: drop
+                        columns:
+                        - planOperatorSummaries
+
+                  - name: frame11
+                    sql: select * from frame10
+                    functions:
+                      - name: unfurl 
+                        expression: "col.*"
+                      - name: drop
+                        columns:
+                        - col                           
+
+                  - name: frame12
+                    sql: select * from frame11
+                    functions:
+                      - name: drop
+                        columns:
+                        - catalogs
+                        - clientTags
+                        - filterPolicies
+                        - maskPolicies
+                        - tables
+                        - warnings
+                        - filterExpressions
+                        - masks                        
+
+                  - name: frames   # final_frame(unnested)
+                    sql: select * from frame12
+                    functions:
+                      - name: rename_all
+                        columns:
+                          catalog: depot
+                          schema: collection
+                          table: dataset
+
+
+                  - name: ad_frame1   # completed.
+                    sql: >
+                           select date(time) as date,depot,collection,dataset,
+                           user,max(_timestamp) as last_queried_at,count(queryHash) as query_count,
+                           count(date_add(time,-07)) as count_queries_7_days,
+                           count(date_add(time,-30)) as count_queries_30_days,
+                           PERCENT_RANK() OVER(order by dataset,user) as popularity_rank
+                           from frames where dataset!="null" group by 1,2,3,4,5
+
+                  - name: ad_frame2   # completed.
+                    sql: >
+                           select date,depot,collection,dataset,queryHash,array(user) as frequent_users,last_queried_at,query_count,
+                           to_json(array(named_struct('queryHash', queryHash, 'last_queried_at', last_queried_at, 'query_count', query_count ))) as associated_datasets_info,
+                           to_json(array(named_struct('user', user, 'last_queried_at', last_queried_at, 'query_count', query_count ))) as frequent_users_info,
+                           to_json(array(named_struct('queryHash', queryHash, 'last_queried_at', last_queried_at, 'query_count', query_count ))) as frequent_query_info from 
+                           (select date(time) as date,depot,collection,dataset,user,queryHash,max(_timestamp) as last_queried_at,count(queryHash) as query_count from frames where depot!="null" group by 1,2,3,4,5,6)
+#--------------------------------------------------------------------------------------------------------------------------#             
+                  - name: daily_dataset_query_count_user   # completed.
+                    sql: >
+                            select date(time) as date,depot,collection,dataset,user,count(queryHash) as query_count,max(_timestamp) as last_queried_at from frames where dataset!="null" group by 1,2,3,4,5 order by query_count desc
+
+
+                  - name: daily_associated_dataset_query_count   # completed.
+                    sql: >
+                            select date,depot,collection,dataset,associated_depot,associated_collection,associated_dataset,count(queryHash) as query_count,max(_timestamp) as last_queried_at from (select date(a.time) as date,a.depot as depot,a.collection as collection,a.dataset as dataset,b.depot as associated_depot,b.collection as associated_collection,b.dataset as associated_dataset,a.queryHash,a._timestamp from frames as a join frames as b on a.depot=b.depot and a.collection=b.collection and a.dataset<>b.dataset where b.dataset!="null") group by 1,2,3,4,5,6,7
+
+
+                  - name: daily_dataset_distinct_query_info   # completed.
+                    sql: >
+                            select date(time) as date,depot,collection,dataset,queryHash as query_hash,query,array(user) as users,count(queryHash) as query_count,avg(executionTime) as avg_execution_time_ms,max(_timestamp) as last_queried_at from frames where dataset!="null" group by 1,2,3,4,5,6,7 order by query_count desc
+
+
+                  - name: daily_dataset_summary_rolling_last_month_0   # completed.
+                    sql: >
+                         select  a.date,a.depot,a.collection,a.dataset,a.last_queried_at,d.count_queries_7_days as cq07d,d.count_queries_30_days as cq30d,d.popularity_rank,c.associated_dataset,b.associated_datasets_info adi,a.users as frequent_users,b.frequent_users_info as fui,b.frequent_query_info as fqi
+                         from 
+                         daily_dataset_distinct_query_info as a
+                         left join ad_frame2 as b
+                         on a.date=b.date and a.depot=b.depot and a.collection=b.collection and a.dataset=b.dataset and a.last_queried_at=b.last_queried_at
+                         left join daily_associated_dataset_query_count as c
+                         on b.date=c.date and b.depot=c.depot and b.collection=c.collection and b.dataset=c.dataset and b.last_queried_at=c.last_queried_at
+                         left join ad_frame1 as d
+                         on d.date=c.date and d.depot=c.depot and d.collection=c.collection and d.dataset=c.dataset
+                         left join daily_dataset_query_count_user as e
+                         on e.date=d.date and e.depot=d.depot and e.collection=d.collection and e.dataset=d.dataset
+                         where c.associated_dataset!="null"   
+
+
+                  - name: daily_dataset_summary_rolling_last_month_1   # completed.
+                    sql: >
+                          select date,depot,collection,dataset,last_queried_at,count_queries_7_days as cq07d,count_queries_30_days as cq30d,PERCENT_RANK() OVER(order by dataset,user) as popularity_rank,associated_dataset,to_json(array(named_struct('queryHash', queryHash, 'last_queried_at', last_queried_at, 'query_count', query_count ))) as associated_datasets_info,array(user) as frequent_users,to_json(array(named_struct('user', user, 'last_queried_at', last_queried_at, 'query_count', query_count ))) as frequent_users_info,to_json(array(named_struct('queryHash', queryHash, 'last_queried_at', last_queried_at, 'query_count', query_count ))) as frequent_query_info
+                          
+                          from (select date(time) as date,depot,collection,dataset,associated_dataset,user,queryHash,max(_timestamp) as last_queried_at,count(queryHash) as query_count,count(date_add(time,-07)) as count_queries_7_days,count(date_add(time,-30)) as count_queries_30_days
+                          
+                          from (select array(b.dataset) as associated_dataset,a.depot as depot,a.collection as collection,a.dataset as dataset,a.time,a.user,a.queryHash,a._timestamp from frames as a join frames as b on a.time=b.time and a.depot=b.depot and a.collection=b.collection and a.dataset<>b.dataset where b.dataset!="null")
+
+                          frames group by 1,2,3,4,5,6,7) 
+                          order by popularity_rank desc
+
+
+                  - name: daily_column_summary_rolling_last_month   # completed.
+                    sql: >
+                            select date(time) as date,depot,collection,dataset,name as column_name,max(_timestamp) as last_queried_at,count(date(time-INTERVAL 7 day)) as count_queries_7_days,count(date(time-INTERVAL 30 day)) as count_queries_30_days from frames where dataset!="null" group by 1,2,3,4,5 order by column_name asc,last_queried_at desc
+
+#--------------------------------------------------------------------------------------------------------------------------#
